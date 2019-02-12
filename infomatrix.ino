@@ -14,12 +14,15 @@ D6	Led2
 #include <Bounce2.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-
+#include <FastLED.h>
+#include <FastLED_GFX.h>
+#include <LEDMatrix.h>
 
 #define BUTTON_PIN1 D2
 #define BUTTON_PIN2 D3
 #define LED_PIN1 D5
 #define LED_PIN2 D6
+#define MATRIXPIN D1
 
 // WIFI parameters from "secret.h"
 const char* SSID = MYWIFISSID;
@@ -31,17 +34,31 @@ int BROKER_PORT = 1883;
 WiFiClient espClient;
 PubSubClient MQTT(espClient); 
 
+long lastMsg = 0;
+char msg[50];
+
 // ntp 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 60000);
 
+// bounce
 Bounce debouncer1 = Bounce(); // Instantiate a Bounce object
 Bounce debouncer2 = Bounce(); // Instantiate a Bounce object
 
-long lastMsg = 0;
-char msg[50];
+// machine state
 int state = 0; //state of the machine
 const int maxstate = 1; // highest possible state
+
+//matrix
+#define COLOR_ORDER    GRB
+#define CHIPSET        WS2812B
+#define MATRIX_WIDTH   8 // width of matrix
+
+#define MATRIX_HEIGHT  32 // height of matrix
+
+#define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_RIGHT + MTX_MATRIX_COLUMNS +MTX_MATRIX_ZIGZAG ) // matrix layout flags, add together as needed
+
+cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> matrix;
 
 void setup() {
    
@@ -97,7 +114,11 @@ void initNTP() {
    timeClient.begin();
 }
 
-
+void initMatrix() {
+   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(matrix[0], matrix.Size());
+   FastLED.setBrightness(17);
+   FastLED.clear(true);
+}
 
 // MQTT Broker connection
 void initMQTT() {
