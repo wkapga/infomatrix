@@ -12,6 +12,9 @@ D6	Led2
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h> 
 #include <Bounce2.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
 
 #define BUTTON_PIN1 D2
 #define BUTTON_PIN2 D3
@@ -28,20 +31,26 @@ int BROKER_PORT = 1883;
 WiFiClient espClient;
 PubSubClient MQTT(espClient); 
 
+// ntp 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 60000);
 
 Bounce debouncer1 = Bounce(); // Instantiate a Bounce object
 Bounce debouncer2 = Bounce(); // Instantiate a Bounce object
 
 long lastMsg = 0;
 char msg[50];
+int state = 0; //state of the machine
+const int maxstate = 1; // highest possible state
 
 void setup() {
-  
- 
+   
   initPins();
   initSerial();
   initWiFi();
+  initNTP();
   initMQTT();
+  initMatrix();
 }
 
 
@@ -83,6 +92,12 @@ void initWiFi() {
   Serial.println(" | IP ");
   Serial.println(WiFi.localIP());
 }
+
+void initNTP() {
+   timeClient.begin();
+}
+
+
 
 // MQTT Broker connection
 void initMQTT() {
@@ -143,23 +158,18 @@ void reconnectMQTT() {
   }
 
 void toggle1(){
-   ledState1 = !ledState1;
-   digitalWrite(LED_PIN1,ledState1); // Apply new LED state
-   digitalWrite(RELAY1,ledState1); // Apply new LED state
+   state = state +1;
+ if (state > maxstate) { state = 0;}
    Serial.println("toggle1");
 } 
 
 void toggle2(){
-   ledState2 = !ledState2;
+  /* ledState2 = !ledState2;
    digitalWrite(LED_PIN2,ledState2); // Apply new LED state
    digitalWrite(RELAY2,ledState2); // Apply new LED state
-   Serial.println("toggle2");
+   Serial.println("toggle2"); */
 }
 
-void toggle3(){
-   ledState3 = !ledState3;
-   digitalWrite(LED_PIN3,ledState3); // Apply new LED state
-}
 
 void publishmqtt() {
    long now = millis();
@@ -172,14 +182,13 @@ void publishmqtt() {
       }
       client.publish("haus/light/lamp1/", msg);
 
-      if (ledStater2 == HIGH) {
-         msg = "ON";
-      } else {
-         msg = "OFF";
-      }
-      client.publish("haus/light/lamp2/", msg);
    
    }
+}
+
+void showtime(){
+timeClient.update();
+Serial.println(timeClient.getFormattedTime());
 }
  
 void loop() {
@@ -189,11 +198,27 @@ void loop() {
    
    if ( debouncer1.fell() ) { toggle1(); } // Call code if button transitions from HIGH to LOW
    if ( debouncer2.fell() ) { toggle2(); } // Call code if button transitions from HIGH to LOW
-   if (ledState3 == HIGH) {
-      if (!MQTT.connected()) {
+   if (!MQTT.connected()) {
          reconnectMQTT(); // Retry Worker MQTT Server connection
-      }
-      recconectWiFi(); // Retry WiFi Network connection
-      MQTT.loop();
    }
+   recconectWiFi(); // Retry WiFi Network connection
+   MQTT.loop();
+   
+   switch (state) {
+	case 0:
+	   showtime();
+	   delay(1000);
+           break;
+	case 1:
+	   showweather();
+	   break;
+	default:
+	   showtime();
+	   break;
+   }
+
+
 }
+
+
+
