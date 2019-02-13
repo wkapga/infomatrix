@@ -12,7 +12,8 @@ D6	Led2
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h> 
 #include <Bounce2.h>
-#include <NTPClient.h>
+//#include <NTPClient.h>
+#include <ezTime.h>
 #include <WiFiUdp.h>
 #include <FastLED.h>
 #include <FastLED_GFX.h>
@@ -36,10 +37,12 @@ PubSubClient MQTT(espClient);
 
 long lastMsg = 0;
 char msg[50];
-
+/*
 // ntp 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 60000);
+*/
+Timezone Austria;
 
 // bounce
 Bounce debouncer1 = Bounce(); // Instantiate a Bounce object
@@ -53,10 +56,13 @@ const int maxstate = 1; // highest possible state
 #define COLOR_ORDER    GRB
 #define CHIPSET        WS2812B
 #define MATRIX_WIDTH   8 // width of matrix
-
 #define MATRIX_HEIGHT  32 // height of matrix
 
-#define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_RIGHT + MTX_MATRIX_COLUMNS +MTX_MATRIX_ZIGZAG ) // matrix layout flags, add together as needed
+// #define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_RIGHT + MTX_MATRIX_COLUMNS +MTX_MATRIX_ZIGZAG ) // matrix layout flags, add together as needed
+
+#define MATRIX_TYPE         HORIZONTAL_ZIGZAG_MATRIX
+#define MATRIX_SIZE         (MATRIX_WIDTH*MATRIX_HEIGHT)
+#define NUMPIXELS MATRIX_SIZE
 
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> matrix;
 
@@ -73,14 +79,12 @@ void setup() {
 
 void initPins() {
   pinMode(LED_PIN1,OUTPUT); // Setup the LED
-  digitalWrite(LED_PIN1,ledState1);
+//  digitalWrite(LED_PIN1,ledState1);
   pinMode(LED_PIN2,OUTPUT); // Setup the LED
-  digitalWrite(LED_PIN2,ledState2);
+//  digitalWrite(LED_PIN2,ledState2);
   
-  pinMode(RELAY1,OUTPUT); 
-  digitalWrite(RELAY1,ledState1);
-  pinMode(RELAY2,OUTPUT);
-  digitalWrite(RELAY2,ledState2);
+// pinMode(RELAY1,OUTPUT); 
+//  digitalWrite(RELAY1,ledState1);
 
   debouncer1.attach(BUTTON_PIN1,INPUT_PULLUP); // Attach the debouncer to a pin with INPUT_PULLUP mode
   debouncer1.interval(25); // Use a debounce interval of 25 milliseconds
@@ -111,11 +115,18 @@ void initWiFi() {
 }
 
 void initNTP() {
-   timeClient.begin();
+   //timeClient.begin();
+   waitForSync();
+
+  Serial.println("UTC: " + UTC.dateTime());
+  
+  
+  Austria.setLocation("Europe/Vienna");
+  Serial.println("Vienna time: " + Austria.dateTime());
 }
 
 void initMatrix() {
-   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(matrix[0], matrix.Size());
+   FastLED.addLeds<CHIPSET, MATRIXPIN, COLOR_ORDER>(matrix[0], matrix.Size());
    FastLED.setBrightness(17);
    FastLED.clear(true);
 }
@@ -139,16 +150,16 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(" | ");
   Serial.println(message);
  
-
+/*
   if (strcmp(topic,"haus/light/lamp1")==0){ // 0 means there is a match
-    if ((message == "1")/* && (ledState1 == LOW) */ ) {    toggle1(); Serial.println("debug1"); }
+    if ((message == "1") && (ledState1 == LOW)  ) {    toggle1(); Serial.println("debug1"); }
     if ((message == "0") && (ledState1 == HIGH)) {    toggle1();  }
   }
   if (strcmp(topic,"haus/light/lamp2")==0){ // 0 means there is a match
     if ((message == "1") && (ledState2 == LOW)) {    toggle2();  }
     if ((message == "0") && (ledState2 == HIGH)) {    toggle2();  }
   }
-  
+*/  
 
   message = "";
     Serial.println();
@@ -193,7 +204,7 @@ void toggle2(){
 
 
 void publishmqtt() {
-   long now = millis();
+/*   long now = millis();
    if (now - lastMsg > 2000) {
       lastMsg = now;
       if (ledState1 == HIGH) {
@@ -203,15 +214,19 @@ void publishmqtt() {
       }
       client.publish("haus/light/lamp1/", msg);
 
-   
    }
-}
+*/}
 
 void showtime(){
-timeClient.update();
-Serial.println(timeClient.getFormattedTime());
+//timeClient.update();
+//Serial.println(timeClient.getFormattedTime());
+   Serial.println(Austria.dateTime("H:i:s"));
 }
- 
+
+void showweather(){
+   Serial.println("Wetter");
+}
+
 void loop() {
 
    debouncer1.update(); // Update the Bounce instance
@@ -240,6 +255,3 @@ void loop() {
 
 
 }
-
-
-
