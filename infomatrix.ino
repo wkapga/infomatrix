@@ -15,9 +15,14 @@ D6	Led2
 //#include <NTPClient.h>
 #include <ezTime.h>
 #include <WiFiUdp.h>
-#include <FastLED.h>
+/*#include <FastLED.h>
 #include <FastLED_GFX.h>
-#include <LEDMatrix.h>
+#include <LEDMatrix.h> */
+#include <Adafruit_GFX.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
+
+
 
 #define BUTTON_PIN1 D2
 #define BUTTON_PIN2 D3
@@ -53,7 +58,7 @@ int state = 0; //state of the machine
 const int maxstate = 1; // highest possible state
 
 //matrix
-#define COLOR_ORDER    GRB
+/*#define COLOR_ORDER    GRB
 #define CHIPSET        WS2812B
 #define MATRIX_WIDTH   8 // width of matrix
 #define MATRIX_HEIGHT  32 // height of matrix
@@ -65,6 +70,11 @@ const int maxstate = 1; // highest possible state
 #define NUMPIXELS MATRIX_SIZE
 
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> matrix;
+*/
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 32, MATRIXPIN,
+  NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
+  NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
+NEO_GRB + NEO_KHZ800);
 
 void setup() {
    
@@ -126,9 +136,13 @@ void initNTP() {
 }
 
 void initMatrix() {
-   FastLED.addLeds<CHIPSET, MATRIXPIN, COLOR_ORDER>(matrix[0], matrix.Size());
+ /*   FastLED.addLeds<CHIPSET, MATRIXPIN, COLOR_ORDER>(matrix[0], matrix.Size());
    FastLED.setBrightness(17);
-   FastLED.clear(true);
+   FastLED.clear(true); */
+     matrix.begin();
+  matrix.setTextWrap(false);
+  matrix.setBrightness(40);
+matrix.setTextColor(matrix.Color(255, 0, 0));
 }
 
 // MQTT Broker connection
