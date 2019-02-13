@@ -217,15 +217,6 @@ void publishmqtt() {
    }
 */}
 
-void showtime(){
-//timeClient.update();
-//Serial.println(timeClient.getFormattedTime());
-   Serial.println(Austria.dateTime("H:i:s"));
-}
-
-void showweather(){
-   Serial.println("Wetter");
-}
 
 void loop() {
 
