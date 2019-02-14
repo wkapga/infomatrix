@@ -1,10 +1,10 @@
-void showtime(){
+void showtime2(){
 //timeClient.update();
 //Serial.println(timeClient.getFormattedTime());
    Serial.println(Austria.dateTime("H:i:s"));
 }
 
-void showweather(){
+void showweather2(){
    int h, y;
    h = 0;
    Serial.println("Wetter");

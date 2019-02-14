@@ -71,8 +71,8 @@ const int maxstate = 1; // highest possible state
 
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> matrix;
 */
-Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 32, MATRIXPIN,
-  NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, MATRIXPIN,
+  NEO_MATRIX_TOP     + NEO_MATRIX_LEFT +
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
 NEO_GRB + NEO_KHZ800);
 
