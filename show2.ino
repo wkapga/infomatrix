@@ -1,28 +1,39 @@
 void showtime(){
-//timeClient.update();
-//Serial.println(timeClient.getFormattedTime());
-   Serial.println(Austria.dateTime("H:i:s"));
+   //Serial.println(Austria.dateTime("H:i:s"));
+    int cc; // current clock color
+    int hr, sec;
+    sec = Austria.second();
+    hr =  Austria.hour();
 
+    cc =   matrix.Color(3 * sec + 3 * hr,
+			255 - 3 * sec + 3 * hr, 
+			255 - 2 * hr) ;
     matrix.fillScreen(0);
-    matrix.setCursor(0, 0);
-    matrix.setTextColor( matrix.Color(0 + 3* Austria.second(), 255 - 3* Austria.second(), 10 + 4* Austria.minute()) );
-  
-    matrix.print(Austria.dateTime("H"));
-    matrix.setCursor(0+5+1+5+2,0);
+    matrix.setTextColor(cc);
+
+    if (Austria.hour()>10) {  
+        matrix.setCursor(0, 0);
+    	matrix.print(Austria.dateTime("H"));
+    } else {
+	matrix.setCursor(6,0);
+    	matrix.print(Austria.dateTime("G"));
+    } 
+ 
+    matrix.setCursor(14,0);
   
     matrix.print(Austria.dateTime("i"));
     //matrix.setTextColor( matrix.Color(0, 255, 0) );
-    matrix.drawLine(12,0,12,8,matrix.Color(150,150,50));
+    matrix.drawLine(12,2,12,6,cc));
   
     matrix.show();
     
     // if (minuteChanged()) {
-	   if (Austria.second()==0 ) {
-	    for (int i=0; i <= 8, i++;){   
-		  matrix.drawFastHLine(0,i,32,matrix.Color(10+i*7,10+i*7,127));
-      matrix.show();
-		  delay(500);
-   	  }
+    if (Austria.second()==0 ) {
+	for (int i=0; i <= 7, i++;){   
+	    matrix.drawFastHLine(0,i,32,matrix.Color(10+i*7,10+i*7,127));
+      	    matrix.show();
+	    delay(500);
+   	}
     }
 
 }
