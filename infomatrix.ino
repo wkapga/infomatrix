@@ -141,7 +141,7 @@ void initMatrix() {
    FastLED.clear(true); */
      matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setBrightness(40);
+  matrix.setBrightness(100);
 matrix.setTextColor(matrix.Color(255, 0, 0));
 }
 
@@ -236,7 +236,7 @@ void loop() {
    switch (state) {
 	case 0:
 	   showtime();
-	   delay(1000);
+	   // delay(1000);
            break;
 	case 1:
 	   showweather();
