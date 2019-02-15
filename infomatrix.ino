@@ -159,25 +159,14 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     char c = (char)payload[i];
     message += c;
   }
-  Serial.print("Topic ");
   Serial.print(topic);
-  Serial.print(" | ");
-  Serial.println(message);
- 
-/*
-  if (strcmp(topic,"haus/light/lamp1")==0){ // 0 means there is a match
-    if ((message == "1") && (ledState1 == LOW)  ) {    toggle1(); Serial.println("debug1"); }
-    if ((message == "0") && (ledState1 == HIGH)) {    toggle1();  }
+
+  if (strcmp(topic,"haus/infomatrix/toggle")==0){ // 0 means there is a match
+        toggle1();  
   }
-  if (strcmp(topic,"haus/light/lamp2")==0){ // 0 means there is a match
-    if ((message == "1") && (ledState2 == LOW)) {    toggle2();  }
-    if ((message == "0") && (ledState2 == HIGH)) {    toggle2();  }
-  }
-*/  
 
   message = "";
-    Serial.println();
-    Serial.flush();
+  Serial.flush();
 }
 
 void reconnectMQTT() {
@@ -186,8 +175,7 @@ void reconnectMQTT() {
       Serial.println(BROKER_MQTT);
       if (MQTT.connect("ESP8266")) {
         Serial.println("Connected");
-      MQTT.subscribe("haus/light/lamp1"); 
-      MQTT.subscribe("haus/light/lamp2"); 
+      MQTT.subscribe("haus/infomatrix/toggle"); 
       } else {
         Serial.println("Connection failed");
         Serial.println("Retry in 2 secs");

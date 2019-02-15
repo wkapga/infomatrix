@@ -50,7 +50,7 @@ void showweather(){
     delay(1000); */
     matrix.fillScreen(0);
     matrix.setCursor(0, 0);
-    matrix.print(F("20:59"));
+    matrix.print(F("WW 48");
     matrix.setTextColor( matrix.Color(0, 255, 0) );
   
     matrix.show();
